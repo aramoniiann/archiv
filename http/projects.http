@@ -1,0 +1,106 @@
+@baseUrl = http://localhost:8000/api
+
+### Login Demo
+# @name login
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "demo@archiv.test",
+  "password": "password"
+}
+
+### Login Other
+# @name otherLogin
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "other@archiv.test",
+  "password": "password"
+}
+
+###
+@token = {{login.response.body.token}}
+@otherToken = {{otherLogin.response.body.token}}
+
+### Listar projetos
+GET {{baseUrl}}/projects
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Criar projeto
+# @name created
+POST {{baseUrl}}/projects
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Projeto novo",
+  "description": "Criado pelo rest.http",
+  "start_date": "2026-11-16",
+  "due_date": "2026-12-20"
+}
+
+### Ver projeto
+GET {{baseUrl}}/projects/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Concluir projeto
+PATCH {{baseUrl}}/projects/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "completed"
+}
+
+### Reabrir projeto
+PATCH {{baseUrl}}/projects/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "in_progress"
+}
+
+### Excluir projeto
+DELETE {{baseUrl}}/projects/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Projeto sem nome (422)
+POST {{baseUrl}}/projects
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "description": "sem nome"
+}
+
+### Prazo antes das tarefas (422)
+PATCH {{baseUrl}}/projects/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "due_date": "2026-11-20"
+}
+
+### Sem token (401)
+GET {{baseUrl}}/projects
+Accept: application/json
+
+### Projeto de outro usuário (403)
+GET {{baseUrl}}/projects/1
+Accept: application/json
+Authorization: Bearer {{otherToken}}
+

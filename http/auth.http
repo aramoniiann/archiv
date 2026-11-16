@@ -1,0 +1,56 @@
+@baseUrl = http://localhost:8000/api
+
+### Cadastro
+POST {{baseUrl}}/auth/register
+Accept: application/json
+Content-Type: application/json
+
+{
+  "name": "Novo Usuário",
+  "email": "novo@archiv.test",
+  "password": "password",
+  "password_confirmation": "password"
+}
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "demo@archiv.test",
+  "password": "password"
+}
+
+###
+@token = {{login.response.body.token}}
+
+### Usuário logado
+GET {{baseUrl}}/auth/me
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Logout
+POST {{baseUrl}}/auth/logout
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Token após logout (401)
+GET {{baseUrl}}/auth/me
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Senha errada (422)
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "demo@archiv.test",
+  "password": "errada"
+}
+
+### Sem token (401)
+GET {{baseUrl}}/auth/me
+Accept: application/json

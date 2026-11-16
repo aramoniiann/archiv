@@ -1,0 +1,103 @@
+@baseUrl = http://localhost:8000/api
+
+### Login Demo
+# @name login
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "demo@archiv.test",
+  "password": "password"
+}
+
+### Login Other
+# @name otherLogin
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "other@archiv.test",
+  "password": "password"
+}
+
+###
+@token = {{login.response.body.token}}
+@otherToken = {{otherLogin.response.body.token}}
+
+### Listar dificuldades
+GET {{baseUrl}}/difficulties
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Criar dificuldade
+# @name created
+POST {{baseUrl}}/difficulties
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "subject": "Entender as rotas",
+  "learning_id": 1,
+  "level": 3
+}
+
+### Ver dificuldade
+GET {{baseUrl}}/difficulties/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Resolver dificuldade
+PATCH {{baseUrl}}/difficulties/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "resolved"
+}
+
+### Reabrir dificuldade
+PATCH {{baseUrl}}/difficulties/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "studying"
+}
+
+### Excluir dificuldade
+DELETE {{baseUrl}}/difficulties/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Nível inválido (422)
+POST {{baseUrl}}/difficulties
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "subject": "Teste",
+  "level": 9
+}
+
+### Aprendizado de outro usuário (422)
+POST {{baseUrl}}/difficulties
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "subject": "Teste",
+  "learning_id": 4
+}
+
+### Dificuldade de outro usuário (403)
+GET {{baseUrl}}/difficulties/1
+Accept: application/json
+Authorization: Bearer {{otherToken}}
+

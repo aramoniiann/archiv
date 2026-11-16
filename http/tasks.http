@@ -1,0 +1,98 @@
+@baseUrl = http://localhost:8000/api
+
+### Login Demo
+# @name login
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "demo@archiv.test",
+  "password": "password"
+}
+
+### Login Other
+# @name otherLogin
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "other@archiv.test",
+  "password": "password"
+}
+
+###
+@token = {{login.response.body.token}}
+@otherToken = {{otherLogin.response.body.token}}
+@projectId = 1
+
+### Listar tarefas
+GET {{baseUrl}}/projects/{{projectId}}/tasks
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Criar tarefa
+# @name created
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Escrever testes",
+  "priority": "high",
+  "due_date": "2026-11-30"
+}
+
+### Ver tarefa
+GET {{baseUrl}}/tasks/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Concluir tarefa
+PATCH {{baseUrl}}/tasks/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "completed"
+}
+
+### Reabrir tarefa
+PATCH {{baseUrl}}/tasks/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "status": "in_progress"
+}
+
+### Excluir tarefa
+DELETE {{baseUrl}}/tasks/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Prazo depois do projeto (422)
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Tarefa atrasada",
+  "due_date": "2027-01-15"
+}
+
+### Tarefa em projeto de outro usuário (403)
+POST {{baseUrl}}/projects/{{projectId}}/tasks
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{otherToken}}
+
+{
+  "title": "Tentativa"
+}
+

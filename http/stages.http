@@ -1,0 +1,106 @@
+@baseUrl = http://localhost:8000/api
+
+### Login Demo
+# @name login
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "demo@archiv.test",
+  "password": "password"
+}
+
+### Login Other
+# @name otherLogin
+POST {{baseUrl}}/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "other@archiv.test",
+  "password": "password"
+}
+
+###
+@token = {{login.response.body.token}}
+@otherToken = {{otherLogin.response.body.token}}
+@taskId = 2
+
+### Listar etapas
+GET {{baseUrl}}/tasks/{{taskId}}/stages
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Criar etapa
+# @name created
+POST {{baseUrl}}/tasks/{{taskId}}/stages
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Testar o login no rest.http"
+}
+
+### Ver etapa
+GET {{baseUrl}}/stages/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### Marcar etapa
+PATCH {{baseUrl}}/stages/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "is_completed": true
+}
+
+### Desmarcar etapa
+PATCH {{baseUrl}}/stages/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "is_completed": false
+}
+
+### Mudar posição
+PATCH {{baseUrl}}/stages/{{created.response.body.data.id}}
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "position": 1
+}
+
+### Excluir etapa
+DELETE {{baseUrl}}/stages/{{created.response.body.data.id}}
+Accept: application/json
+Authorization: Bearer {{token}}
+
+### is_completed inválido (422)
+POST {{baseUrl}}/tasks/{{taskId}}/stages
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "Etapa",
+  "is_completed": "talvez"
+}
+
+### Etapa de outro usuário (403)
+PATCH {{baseUrl}}/stages/1
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{otherToken}}
+
+{
+  "is_completed": false
+}
+
